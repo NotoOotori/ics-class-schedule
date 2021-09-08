@@ -42,6 +42,35 @@ periods: # 上课时间表
 semesters:
   - name: 2021–2022 学年 第一学期
     start: 2021-09-13
+    lieux:
+      - name: 中秋节
+        holidays:
+          - week: 1
+            day: 7-9
+        class:
+          - from:
+              week: 2
+              day: 1
+            to:
+              week: 1
+              day: 6
+      - name: 国庆节
+        holidays:
+          - week: 4
+            day: 5-11
+        class:
+          - from:
+              week: 5
+              day: 3
+            to:
+              week: 4
+              day: 6
+          - from:
+              week: 5
+              day: 4
+            to:
+              week: 5
+              day: 6
     courses:
       - id: MATH620005
         name: 泛函分析基础

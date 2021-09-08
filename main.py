@@ -4,9 +4,9 @@ import re
 import yaml
 
 
-class Range(tuple):
+class Range(list):
   def __new__(cls, start, end):
-    return tuple.__new__(cls, [start, end])
+    return list(range(start, end + 1))
   def __repr__(self):
     return 'Range(%s, %s)'
 
@@ -22,6 +22,31 @@ class Time(datetime.time):
     return datetime.time.fromisoformat(time)
   def __repr__(self):
     return 'Time(%s)'
+
+class Semester(dict):
+  def get_date(self, week, day):
+    return self['start'] + datetime.timedelta(weeks=week-1) + datetime.timedelta(days=day-1)
+  def export_holiday_event(self):
+    lieux = self['lieux']
+    for lieu in lieux:
+      lieu_name = lieu['name']
+      holidays = lieu['holidays']
+      for index, holiday in enumerate(holidays):
+        week = holiday['week']
+        day = holiday['day']
+        first_day = day[0]
+        last_day = day[-1] + 1
+        first_date = self.get_date(week, first_day)
+        last_date = self.get_date(week, last_day)
+        write_to_file('''BEGIN:VEVENT
+UID:%s:%s@%s
+DTSTAMP:%s
+SUMMARY:%s
+DTSTART;TZID=Asia/Shanghai;VALUE=DATE:%s
+DTEND;TZID=Asia/Shanghai;VALUE=DATE:%s
+END:VEVENT
+''' % (self['name'], lieu_name, index, get_current_timestamp(), lieu_name + '假期', format_date(first_date), format_date(last_date))
+)
 
 LOCATION = {
   'H': r'\n上海市杨浦区邯郸路 220 号复旦大学邯郸校区\, 上海\, 上海\, 200433',
@@ -49,8 +74,11 @@ CALSCALE:GREGORIAN
 METHOD:PUBLISH
 ''' % contents['name'], 'w')
   for semester in contents['semesters']:
+    semester = Semester(semester)
     semester_name = semester['name']
     semester_start = semester['start']
+    semester_lieux = semester['lieux']
+    semester.export_holiday_event()
     for course in semester['courses']:
       course_id = course['id']
       course_name = course['name']
@@ -58,17 +86,16 @@ METHOD:PUBLISH
       for index, schedule in enumerate(course['schedule']):
         week = schedule['week']
         first_week = week[0]
-        last_week = week[1]
+        last_week = week[-1]
         day = schedule['day']
-        first_day = semester_start + datetime.timedelta(weeks=first_week-1) + datetime.timedelta(days=day-1)
-        last_day = semester_start + datetime.timedelta(weeks=last_week-1) + datetime.timedelta(days=day-1)
+        first_date = semester.get_date(first_week, day)
+        last_date = semester.get_date(last_week, day)
         skip = schedule.get('skip', 1)
         period = schedule['period']
         first_period = period[0]
-        second_period = period[1]
+        second_period = period[-1]
         start_time = datetime.time.fromisoformat(periods[first_period]['start'])
         end_time = datetime.time.fromisoformat(periods[second_period]['end'])
-        current_time = datetime.datetime.now()
         location = schedule['location']
         description = r'课程代码: {}\n任课教师: {}'.format(course_id, course_teacher)
         write_to_file('''BEGIN:VEVENT
@@ -81,9 +108,8 @@ DTEND;TZID=Asia/Shanghai:%sT%s
 RRULE:FREQ=WEEKLY;INTERVAL=%s;UNTIL=%sT240000Z
 DESCRIPTION:%s
 END:VEVENT
-''' % (semester_name, course_name, index, current_time.strftime('%Y%m%dT%H%M%S'), format_location(location), course_name, first_day.strftime('%Y%m%d'), start_time.strftime('%H%M%S'), first_day.strftime('%Y%m%d'), end_time.strftime('%H%M%S'), skip, last_day.strftime('%Y%m%d'), description))
+''' % (semester_name, course_name, index, get_current_timestamp(), format_location(location), course_name, first_date.strftime('%Y%m%d'), start_time.strftime('%H%M%S'), first_date.strftime('%Y%m%d'), end_time.strftime('%H%M%S'), skip, last_date.strftime('%Y%m%d'), description))
   write_to_file('END:VCALENDAR')
-
 
 def write_to_file(text, parameter='a'):
   filename = 'output/graduate.ics'
@@ -91,10 +117,11 @@ def write_to_file(text, parameter='a'):
   with open(filename, parameter, encoding='UTF-8') as f:
     f.write(text)
 
-'''
-Location
-Notes (DESCRIPTION)
-'''
+def get_current_timestamp():
+  return datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
+
+def format_date(date):
+  return date.strftime('%Y%m%d')
 
 if __name__ == '__main__':
   main()
