@@ -46,7 +46,7 @@ semesters:
       - name: 中秋节
         holidays:
           - week: 1
-            day: 7-9
+            days: 7-9
         class:
           - from:
               week: 2
@@ -56,20 +56,20 @@ semesters:
               day: 6
       - name: 国庆节
         holidays:
-          - week: 4
-            day: 5-11
+          - week: 3
+            days: 5-11
         class:
           - from:
-              week: 5
+              week: 4
               day: 3
             to:
-              week: 4
+              week: 3
               day: 6
           - from:
-              week: 5
+              week: 4
               day: 4
             to:
-              week: 5
+              week: 4
               day: 6
     courses:
       - id: MATH620005
@@ -77,84 +77,84 @@ semesters:
         teacher: 郭坤宇
         schedule:
           # 一周中有多次课程的情况需要以列表的形式分开录入
-          - week: 1-16 # 第一次上课的周数和最后一次上课的周数
+          - weeks: 1-16 # 第一次上课的周数和最后一次上课的周数
             # skip: 1 # 几周上一次, 默认为 1
             day: 3 # 星期几
-            period: 6-8 # 第几节到第几节
+            periods: 6-8 # 第几节到第几节
             location: HGX308 # 教室代号
       - id: MATH620002
         name: 现代微分几何基础
         teacher: 东瑜昕
         schedule:
-          - week: 1-16
+          - weeks: 1-16
             day: 4
-            period: 11-13
+            periods: 11-13
             location: H4306
       - id: MATH620018
         name: 代数几何
         teacher: 江智
         schedule:
-          - week: 1-12
+          - weeks: 1-12
             day: 1
-            period: 4-5
+            periods: 4-5
             location: H6509
-          - week: 1-12
+          - weeks: 1-12
             day: 3
-            period: 4-5
+            periods: 4-5
             location: H6509
       - id: MATH620001
         name: 代数拓扑基础
         teacher: 吕志
         schedule:
-          - week: 1-12
+          - weeks: 1-12
             day: 4
-            period: 4-5
+            periods: 4-5
             location: H3109
-          - week: 1-12
+          - weeks: 1-12
             day: 5
-            period: 3-4
+            periods: 3-4
             location: H3109
       - id: MATH620006
         name: 抽象代数基础
         teacher: 吴泉水
         schedule:
-          - week: 1-12
+          - weeks: 1-12
             day: 1
-            period: 1-2
+            periods: 1-2
             location: HGX1061
-          - week: 1-12
+          - weeks: 1-12
             day: 3
-            period: 1-2
+            periods: 1-2
             location: HGX1061
       - id: PHYS630025
         name: 量子信息
         teacher: 施郁
         schedule:
-          - week: 1-16
+          - weeks: 1-16
             day: 4
-            period: 6-8
+            periods: 6-8
             location: HGX104
       - id: PTSS732001
         name: 新时代中国特色社会主义理论与实践
         teacher: 孙谦
         schedule:
-          - week: 1-16
+          - weeks: 1-16
             day: 1
-            period: 8-9
+            periods: 8-9
             location: H2101
       - id: DOCT810004
         name: 中国马克思主义与当代
         teacher: 马拥军
         schedule:
-          - week: 1-11
+          - weeks: 1-11
             day: 5
-            period: 6-9
+            periods: 6-9
             location: H3209
       - id: PEDU733012
         name: 排球
         teacher: 郝霖霖
         schedule:
-          - week: 1-16
+          - weeks: 1-16
             day: 2
-            period: 11-12
+            periods: 11-12
             location: J江湾综合体育馆3011室-排球场

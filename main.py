@@ -23,6 +23,21 @@ class Time(datetime.time):
   def __repr__(self):
     return 'Time(%s)'
 
+class Lieu(dict):
+  def __init__(self, lieu, semester_start):
+    self.semester_start = semester_start
+    super().__init__(lieu)
+  def get_date(self, week, day):
+    return self.semester_start + datetime.timedelta(weeks=week-1) + datetime.timedelta(days=day-1)
+  def get_holiday_dates(self):
+    dates = []
+    holidays = self['holidays']
+    for holiday in holidays:
+      week = holiday['week']
+      days = holiday['days']
+      dates += [self.get_date(week, day) for day in days]
+    return dates
+
 class Semester(dict):
   def get_date(self, week, day):
     return self['start'] + datetime.timedelta(weeks=week-1) + datetime.timedelta(days=day-1)
@@ -33,9 +48,9 @@ class Semester(dict):
       holidays = lieu['holidays']
       for index, holiday in enumerate(holidays):
         week = holiday['week']
-        day = holiday['day']
-        first_day = day[0]
-        last_day = day[-1] + 1
+        days = holiday['days']
+        first_day = days[0]
+        last_day = days[-1] + 1
         first_date = self.get_date(week, first_day)
         last_date = self.get_date(week, last_day)
         write_to_file('''BEGIN:VEVENT
@@ -77,25 +92,34 @@ METHOD:PUBLISH
     semester = Semester(semester)
     semester_name = semester['name']
     semester_start = semester['start']
-    semester_lieux = semester['lieux']
+    semester_lieux = [Lieu(lieu, semester_start) for lieu in semester['lieux']]
     semester.export_holiday_event()
     for course in semester['courses']:
       course_id = course['id']
       course_name = course['name']
       course_teacher = course['teacher']
       for index, schedule in enumerate(course['schedule']):
-        week = schedule['week']
-        first_week = week[0]
-        last_week = week[-1]
+        fake_weeks = schedule['weeks']
+        first_week = fake_weeks[0]
+        last_week = fake_weeks[-1]
         day = schedule['day']
-        first_date = semester.get_date(first_week, day)
-        last_date = semester.get_date(last_week, day)
+        # first_date = semester.get_date(first_week, day)
+        # last_date = semester.get_date(last_week, day)
         skip = schedule.get('skip', 1)
-        period = schedule['period']
+        weeks = list(range(first_week, last_week + 1, skip))
+        dates = [semester.get_date(week, day) for week in weeks]
+        first_date = dates[0]
+        last_date = dates[-1]
+        period = schedule['periods']
         first_period = period[0]
         second_period = period[-1]
         start_time = datetime.time.fromisoformat(periods[first_period]['start'])
         end_time = datetime.time.fromisoformat(periods[second_period]['end'])
+        exdates = []
+        for lieu in semester_lieux:
+          exdates += [date for date in dates if date in lieu.get_holiday_dates()]
+        exdates_text = ','.join(['{}T{}Z'.format(format_date(date), format_time(start_time)) for date in exdates])
+        exdate_line = '' if exdates_text == '' else 'EXDATE;TZID=Asia/Shanghai:{}\n'.format(exdates_text)
         location = schedule['location']
         description = r'课程代码: {}\n任课教师: {}'.format(course_id, course_teacher)
         write_to_file('''BEGIN:VEVENT
@@ -105,10 +129,10 @@ LOCATION:%s
 SUMMARY:%s
 DTSTART;TZID=Asia/Shanghai:%sT%s
 DTEND;TZID=Asia/Shanghai:%sT%s
-RRULE:FREQ=WEEKLY;INTERVAL=%s;UNTIL=%sT240000Z
+%sRRULE:FREQ=WEEKLY;INTERVAL=%s;UNTIL=%sT240000Z
 DESCRIPTION:%s
 END:VEVENT
-''' % (semester_name, course_name, index, get_current_timestamp(), format_location(location), course_name, first_date.strftime('%Y%m%d'), start_time.strftime('%H%M%S'), first_date.strftime('%Y%m%d'), end_time.strftime('%H%M%S'), skip, last_date.strftime('%Y%m%d'), description))
+''' % (semester_name, course_name, index, get_current_timestamp(), format_location(location), course_name, first_date.strftime('%Y%m%d'), start_time.strftime('%H%M%S'), first_date.strftime('%Y%m%d'), end_time.strftime('%H%M%S'), exdate_line, skip, last_date.strftime('%Y%m%d'), description))
   write_to_file('END:VCALENDAR')
 
 def write_to_file(text, parameter='a'):
@@ -122,6 +146,9 @@ def get_current_timestamp():
 
 def format_date(date):
   return date.strftime('%Y%m%d')
+
+def format_time(time):
+  return time.strftime('%H%M%S')
 
 if __name__ == '__main__':
   main()
