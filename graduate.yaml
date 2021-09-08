@@ -47,7 +47,7 @@ semesters:
         holidays:
           - week: 1
             days: 7-9
-        class:
+        courses:
           - from:
               week: 2
               day: 1
@@ -58,13 +58,13 @@ semesters:
         holidays:
           - week: 3
             days: 5-11
-        class:
+        courses:
           - from:
               week: 4
               day: 3
             to:
-              week: 3
-              day: 6
+              week: 2
+              day: 7
           - from:
               week: 4
               day: 4

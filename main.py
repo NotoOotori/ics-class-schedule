@@ -27,6 +27,8 @@ class Lieu(dict):
   def __init__(self, lieu, semester_start):
     self.semester_start = semester_start
     super().__init__(lieu)
+    self.holiday_dates = self.get_holiday_dates()
+    self.course_list = self.get_course_list()
   def get_date(self, week, day):
     return self.semester_start + datetime.timedelta(weeks=week-1) + datetime.timedelta(days=day-1)
   def get_holiday_dates(self):
@@ -37,6 +39,8 @@ class Lieu(dict):
       days = holiday['days']
       dates += [self.get_date(week, day) for day in days]
     return dates
+  def get_course_list(self):
+    return [[self.get_date(course[tag]['week'], course[tag]['day']) for tag in ['from', 'to']] for course in self['courses']]
 
 class Semester(dict):
   def get_date(self, week, day):
@@ -103,8 +107,6 @@ METHOD:PUBLISH
         first_week = fake_weeks[0]
         last_week = fake_weeks[-1]
         day = schedule['day']
-        # first_date = semester.get_date(first_week, day)
-        # last_date = semester.get_date(last_week, day)
         skip = schedule.get('skip', 1)
         weeks = list(range(first_week, last_week + 1, skip))
         dates = [semester.get_date(week, day) for week in weeks]
@@ -116,10 +118,16 @@ METHOD:PUBLISH
         start_time = datetime.time.fromisoformat(periods[first_period]['start'])
         end_time = datetime.time.fromisoformat(periods[second_period]['end'])
         exdates = []
+        rdates = []
         for lieu in semester_lieux:
-          exdates += [date for date in dates if date in lieu.get_holiday_dates()]
+          temp_holiday_dates = [date for date in dates if date in lieu.holiday_dates]
+          exdates += temp_holiday_dates
+          rdates += [[lieu['name'], to_date, from_date] for from_date, to_date in lieu.course_list if from_date in temp_holiday_dates]
+
         exdates_text = ','.join(['{}T{}Z'.format(format_date(date), format_time(start_time)) for date in exdates])
         exdate_line = '' if exdates_text == '' else 'EXDATE;TZID=Asia/Shanghai:{}\n'.format(exdates_text)
+        # rdates_text = ','.join(['{}T{}Z'.format(format_date(date), format_time(start_time)) for date in rdates])
+        # rdate_line = '' if rdates_text == '' else 'RDATE;TZID=Asia/Shanghai:{}\n'.format(rdates_text)
         location = schedule['location']
         description = r'课程代码: {}\n任课教师: {}'.format(course_id, course_teacher)
         write_to_file('''BEGIN:VEVENT
@@ -133,6 +141,17 @@ DTEND;TZID=Asia/Shanghai:%sT%s
 DESCRIPTION:%s
 END:VEVENT
 ''' % (semester_name, course_name, index, get_current_timestamp(), format_location(location), course_name, first_date.strftime('%Y%m%d'), start_time.strftime('%H%M%S'), first_date.strftime('%Y%m%d'), end_time.strftime('%H%M%S'), exdate_line, skip, last_date.strftime('%Y%m%d'), description))
+        for lieu_name, to_date, from_date in rdates:
+          write_to_file('''BEGIN:VEVENT
+UID:%s:%s@%s
+DTSTAMP:%s
+LOCATION:%s
+SUMMARY:%s
+DTSTART;TZID=Asia/Shanghai:%sT%s
+DTEND;TZID=Asia/Shanghai:%sT%s
+DESCRIPTION:%s
+END:VEVENT
+''' % (semester_name, course_name, format_date(to_date), get_current_timestamp(), format_location(location), course_name, to_date.strftime('%Y%m%d'), start_time.strftime('%H%M%S'), to_date.strftime('%Y%m%d'), end_time.strftime('%H%M%S'), r'{}调休自 {}\n'.format(lieu_name, from_date.isoformat())+description))
   write_to_file('END:VCALENDAR')
 
 def write_to_file(text, parameter='a'):
