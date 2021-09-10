@@ -48,6 +48,7 @@ class Semester(dict):
   def export_holiday_event(self):
     lieux = self['lieux']
     for lieu in lieux:
+      lieu = Lieu(lieu, self['start'])
       lieu_name = lieu['name']
       holidays = lieu['holidays']
       for index, holiday in enumerate(holidays):
@@ -58,14 +59,25 @@ class Semester(dict):
         first_date = self.get_date(week, first_day)
         last_date = self.get_date(week, last_day)
         write_to_file('''BEGIN:VEVENT
-UID:%s:%s@%s
+UID:%s:%s#%s
 DTSTAMP:%s
 SUMMARY:%s
 DTSTART;TZID=Asia/Shanghai;VALUE=DATE:%s
 DTEND;TZID=Asia/Shanghai;VALUE=DATE:%s
 END:VEVENT
 ''' % (self['name'], lieu_name, index, get_current_timestamp(), lieu_name + '假期', format_date(first_date), format_date(last_date))
-)
+        )
+      for from_date, to_date in lieu.course_list:
+        write_to_file('''BEGIN:VEVENT
+UID:%s:%s@%s
+DTSTAMP:%s
+SUMMARY:%s
+DTSTART;TZID=Asia/Shanghai;VALUE=DATE:%s
+DTEND;TZID=Asia/Shanghai;VALUE=DATE:%s
+END:VEVENT
+''' % (self['name'], lieu_name, format_date(to_date), get_current_timestamp(), '{}调休 ({})'.format(lieu_name, from_date.isoformat()), format_date(to_date), format_date(to_date + datetime.timedelta(days=1)))
+        )
+
 
 LOCATION = {
   'H': r'\n上海市杨浦区邯郸路 220 号复旦大学邯郸校区\, 上海\, 上海\, 200433',
