@@ -134,7 +134,9 @@ METHOD:PUBLISH
         for lieu in semester_lieux:
           temp_holiday_dates = [date for date in dates if date in lieu.holiday_dates]
           exdates += temp_holiday_dates
+          exdates += [to_date for _, to_date in lieu.course_list if to_date in dates]
           rdates += [[lieu['name'], to_date, from_date] for from_date, to_date in lieu.course_list if from_date in temp_holiday_dates]
+          # rdates += [[lieu['name'], from_date, to_date] for from_date, to_date in lieu.course_list if to_date in dates]
 
         exdates_text = ','.join(['{}T{}Z'.format(format_date(date), format_time(start_time)) for date in exdates])
         exdate_line = '' if exdates_text == '' else 'EXDATE;TZID=Asia/Shanghai:{}\n'.format(exdates_text)
