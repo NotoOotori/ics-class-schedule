@@ -72,14 +72,14 @@ semesters:
               week: 4
               day: 6
     courses:
-      - id: MATH820055
-        name: 群表示理论
-        teacher: 陈佳源
-        schedule:
-          - weeks: 1-16
-            day: 6
-            periods: 2-4
-            location: HGX201
+      # - id: MATH820055
+      #   name: 群表示理论
+      #   teacher: 陈佳源
+      #   schedule:
+      #     - weeks: 1-16
+      #       day: 6
+      #       periods: 2-4
+      #       location: HGX201
       - id: MATH620005
         name: 泛函分析基础
         teacher: 郭坤宇
@@ -134,14 +134,14 @@ semesters:
             day: 3
             periods: 1-2
             location: HGX106
-      - id: PHYS630025
-        name: 量子信息
-        teacher: 施郁
-        schedule:
-          - weeks: 1-16
-            day: 4
-            periods: 6-8
-            location: HGX104
+      # - id: PHYS630025
+      #   name: 量子信息
+      #   teacher: 施郁
+      #   schedule:
+      #     - weeks: 1-16
+      #       day: 4
+      #       periods: 6-8
+      #       location: HGX104
       - id: PTSS732001
         name: 新时代中国特色社会主义理论与实践
         teacher: 孙谦
@@ -154,7 +154,7 @@ semesters:
         name: 中国马克思主义与当代
         teacher: 马拥军
         schedule:
-          - weeks: 1-11
+          - weeks: 1-10
             day: 5
             periods: 6-9
             location: H3209
