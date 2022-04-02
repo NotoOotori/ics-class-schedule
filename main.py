@@ -46,6 +46,8 @@ class Semester(dict):
   def get_date(self, week, day):
     return self['start'] + datetime.timedelta(weeks=week-1) + datetime.timedelta(days=day-1)
   def export_holiday_event(self):
+    if 'lieux' not in self.keys():
+      return
     lieux = self['lieux']
     for lieu in lieux:
       lieu = Lieu(lieu, self['start'])
@@ -108,7 +110,10 @@ METHOD:PUBLISH
     semester = Semester(semester)
     semester_name = semester['name']
     semester_start = semester['start']
-    semester_lieux = [Lieu(lieu, semester_start) for lieu in semester['lieux']]
+    if 'lieux' in semester.keys():
+      semester_lieux = [Lieu(lieu, semester_start) for lieu in semester['lieux']]
+    else:
+      semester_lieux = [] # TODO: refactor Semester['lieux']
     semester.export_holiday_event()
     for course in semester['courses']:
       course_id = course['id']
