@@ -168,6 +168,39 @@ semesters:
             location: J江湾综合体育馆3011室-排球场
   - name: 2021–2022 学年 第二学期
     start: 2022-02-21
+    lieux:
+      - name: 清明节
+        holidays:
+          - week: 6
+            days: 7-9
+        courses:
+          - from:
+              week: 7
+              day: 1
+            to:
+              week: 6
+              day: 6
+      - name: 劳动节
+        holidays:
+          - week: 10
+            days: 6-10
+        courses:
+          - from:
+              week: 11
+              day: 2
+            to:
+              week: 9
+              day: 7
+          - from:
+              week: 11
+              day: 3
+            to:
+              week: 11
+              day: 6
+      - name: 端午节
+        holidays:
+          - week: 15
+            days: 5-7
     courses:
       - id: MATH630006
         name: 同调代数
@@ -192,7 +225,7 @@ semesters:
           - weeks: 1-16
             day: 3
             periods: 6-8
-            location: J上海数学中心110
+            location: J上海数学中心446
       - id: MATH630064
         name: 非交换代数专题讨论
         teacher: 吴泉水
@@ -200,7 +233,11 @@ semesters:
           - weeks: 1-16
             day: 1
             periods: 6-8
-            location: J上海数学中心110
+            location: J上海数学中心446
+        lieux:
+          exceptions:
+            - week: 7
+              day: 1
       - id: MATH820074
         name: 同调代数和几何应用
         teacher: 伍晓磊
@@ -228,7 +265,7 @@ semesters:
           - weeks: 1-16
             day: 2
             periods: 11-13
-            location: HGX201
+            location: HGX210
       - id: PEDU733002
         name: 射艺
         teacher: 王震

@@ -40,7 +40,7 @@ class Lieu(dict):
       dates += [self.get_date(week, day) for day in days]
     return dates
   def get_course_list(self):
-    return [[self.get_date(course[tag]['week'], course[tag]['day']) for tag in ['from', 'to']] for course in self['courses']]
+    return [[self.get_date(course[tag]['week'], course[tag]['day']) for tag in ['from', 'to']] for course in self.get('courses') or []]
 
 class Semester(dict):
   def get_date(self, week, day):
@@ -119,6 +119,10 @@ METHOD:PUBLISH
       course_id = course['id']
       course_name = course['name']
       course_teacher = course['teacher']
+      course_lieux = course.get('lieux')
+      temp_exceptions = None if course_lieux is None else course_lieux.get('exceptions')
+      course_exceptions = [] if temp_exceptions is None else [semester.get_date(exception['week'], exception['day']) for exception in temp_exceptions]
+
       for index, schedule in enumerate(course['schedule']):
         fake_weeks = schedule['weeks']
         first_week = fake_weeks[0]
@@ -136,8 +140,8 @@ METHOD:PUBLISH
         end_time = datetime.time.fromisoformat(periods[second_period]['end'])
         exdates = []
         rdates = []
-        for lieu in semester_lieux:
-          temp_holiday_dates = [date for date in dates if date in lieu.holiday_dates]
+        for lieu in semester_lieux: # deal with lieu information
+          temp_holiday_dates = [date for date in dates if date not in course_exceptions and date in lieu.holiday_dates]
           exdates += temp_holiday_dates
           exdates += [to_date for _, to_date in lieu.course_list if to_date in dates]
           rdates += [[lieu['name'], to_date, from_date] for from_date, to_date in lieu.course_list if from_date in temp_holiday_dates]
